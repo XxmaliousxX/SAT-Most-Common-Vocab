@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAT Vocab Quiz</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --text: #f0eff4;
+    --muted: #8b8a9b;
+    --accent: #7c6af7;
+    --accent-dim: #2d2650;
+    --green: #3ecf8e;
+    --green-dim: #0d3326;
+    --red: #f56565;
+    --red-dim: #3b1010;
+    --gold: #f5c842;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  header {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .mode-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px;
+    display: flex;
+    gap: 2px;
+  }
+
+  .mode-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .mode-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .stats-row {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .stat-val {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-val.accent { color: var(--accent); }
+  .stat-val.green { color: var(--green); }
+
+  .progress-wrap {
+    width: 100%;
+    max-width: 640px;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 640px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.25rem;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  .pos-badge {
+    display: inline-block;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+    width: fit-content;
+  }
+
+  .def-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .q-counter {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  .choices {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .choice-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s, border-color 0.12s, transform 0.08s;
+    line-height: 1.3;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    background: var(--surface2);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .choice-btn:active:not(:disabled) { transform: scale(0.98); }
+
+  .choice-btn.correct {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .choice-btn.wrong {
+    background: var(--red-dim);
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .choice-btn:disabled { cursor: default; }
+
+  .feedback {
+    width: 100%;
+    max-width: 640px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    min-height: 24px;
+    transition: color 0.2s;
+  }
+
+  .feedback.good { color: var(--green); }
+  .feedback.bad { color: var(--red); }
+
+  .streak-flame {
+    display: inline-block;
+    margin-right: 4px;
+  }
+
+  /* Keyframe for card entrance */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card, .choices { animation: fadeUp 0.22s ease both; }
+
+  /* Dark mode system override - already dark */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f5f4f9;
+      --surface: #ffffff;
+      --surface2: #eeedf5;
+      --border: #dddce8;
+      --text: #1a1929;
+      --muted: #7a788f;
+      --accent: #6355e8;
+      --accent-dim: #ece9ff;
+      --green: #1a9e66;
+      --green-dim: #d4f5e7;
+      --red: #d63f3f;
+      --red-dim: #fde8e8;
+      --gold: #c48b00;
+    }
+    .card::before { opacity: 0.2; }
+  }
+
+  @media (max-width: 500px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .stat-val { font-size: 20px; }
+    .def-text { font-size: 1.2rem; }
+    .choice-btn { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SAT<span>vocab</span></div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-def" onclick="setMode('def')">Definition → Word</button>
+    <button class="mode-btn" id="btn-word" onclick="setMode('word')">Word → Definition</button>
+  </div>
+</header>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-label">Score</div><div class="stat-val accent" id="score">0</div></div>
+  <div class="stat"><div class="stat-label">Streak</div><div class="stat-val" id="streak">0</div></div>
+  <div class="stat"><div class="stat-label">Seen</div><div class="stat-val" id="seen">0</div></div>
+  <div class="stat"><div class="stat-label">Accuracy</div><div class="stat-val green" id="accuracy">—</div></div>
+</div>
+
+<div class="progress-wrap"><div class="progress-bar" id="prog"></div></div>
+
+<div class="card" id="main-card">
+  <div class="q-counter" id="q-counter"></div>
+  <div class="pos-badge" id="pos-tag"></div>
+  <div class="def-text" id="prompt-text">Loading...</div>
+</div>
+
+<div class="choices" id="choices"></div>
+<div class="feedback" id="feedback"></div>
+
+<script>
+const WORDS = [
+  ["abase","v","to humiliate or degrade"],["abate","v","to lessen or reduce"],["abdicate","v","to give up power"],["abduct","v","to kidnap or seize by force"],["aberration","n","a deviation from the norm"],["abet","v","to assist in wrongdoing"],["abhor","v","to hate deeply"],["abide","v","to tolerate or follow"],["abject","adj","hopeless and miserable"],["abjure","v","to formally reject"],["abnegation","n","self-denial"],["abort","v","to terminate early"],["abridge","v","to shorten"],["abrogate","v","to cancel by authority"],["abscond","v","to run away secretly"],["absolution","n","formal forgiveness"],["abstain","v","to hold back voluntarily"],["abstruse","adj","difficult to understand"],["accede","v","to agree or comply"],["accentuate","v","to emphasize or highlight"],["acclaim","v","to praise publicly"],["accolade","n","an award or honor"],["accommodating","adj","willing to help"],["acerbic","adj","sharp or bitter in tone"],["acquiesce","v","to give in passively"],["acrimony","n","bitterness or hostility"],["acumen","n","keen insight or skill"],["acute","adj","sharp or severe"],["adamant","adj","unyielding or firm"],["adept","adj","highly skilled"],["adhere","v","to stick to or follow"],["admonish","v","to warn or scold"],["adroit","adj","skillful and clever"],["adulation","n","excessive praise"],["adulterate","v","to make impure"],["adumbrate","v","to foreshadow or suggest"],["adverse","adj","unfavorable or harmful"],["advocate","v","to support or argue for"],["aesthetic","adj","concerned with beauty"],["affable","adj","friendly and easy to talk to"],["affinity","n","a natural connection or liking"],["affluent","adj","wealthy and well-off"],["affront","n","an insult or offense"],["aggrandize","v","to increase in power or wealth"],["aggravate","v","to make worse"],["aggregate","n","a whole formed by parts"],["aggrieved","adj","feeling wronged or offended"],["agile","adj","quick and nimble"],["alacrity","n","eager readiness"],["allay","v","to ease or calm"],["alleviate","v","to lessen or relieve"],["aloof","adj","emotionally distant"],["altercation","n","a noisy argument"],["amalgamate","v","to combine or unite"],["ambiguous","adj","unclear or having multiple meanings"],["ambivalent","adj","having mixed feelings"],["ameliorate","v","to improve or make better"],["amenable","adj","open to suggestion"],["amiable","adj","friendly and pleasant"],["amicable","adj","done in a friendly way"],["amorphous","adj","without a clear shape"],["anachronistic","adj","out of place in time"],["analogous","adj","comparable or similar"],["anathema","n","something hated or cursed"],["anecdote","n","a short personal story"],["anguish","n","great pain or suffering"],["animated","adj","full of life or excitement"],["anomaly","n","something unusual"],["antagonism","n","hostility or opposition"],["antecedent","n","something that comes before"],["antediluvian","adj","extremely old"],["anthology","n","a collection of writings"],["antipathy","n","a strong dislike"],["antiquated","adj","outdated or old-fashioned"],["antithesis","n","the direct opposite"],["apathetic","adj","lacking interest or emotion"],["apocryphal","adj","of doubtful authenticity"],["appalling","adj","shocking or horrifying"],["appease","v","to calm or satisfy"],["approbation","n","approval or praise"],["arbiter","n","a judge or mediator"],["arbitrary","adj","based on whim, not reason"],["arcane","adj","mysterious or secret"],["archaic","adj","old and no longer used"],["ardor","n","intense passion or enthusiasm"],["arid","adj","extremely dry"],["arrogate","v","to claim without right"],["ascertain","v","to find out for certain"],["ascetic","adj","practicing strict self-discipline"],["ascribe","v","to attribute to a cause"],["aspersion","n","a damaging remark"],["aspire","v","to strive toward a goal"],["assiduous","adj","hardworking and diligent"],["assuage","v","to ease or relieve"],["astute","adj","sharp or clever"],["atone","v","to make up for a wrong"],["atrophy","v","to waste away"],["audacious","adj","bold and daring"],["augment","v","to increase or enlarge"],["auspicious","adj","favorable or promising"],["austere","adj","strict or plain"],["avarice","n","extreme greed"],["aversion","n","strong dislike"],["balk","v","to hesitate or refuse"],["banal","adj","lacking originality"],["bane","n","a cause of distress or annoyance"],["bashful","adj","shy or easily embarrassed"],["beguile","v","to charm or deceive"],["behemoth","n","something enormous"],["benevolent","adj","kind and generous"],["benign","adj","harmless or gentle"],["bequeath","v","to leave in a will"],["berate","v","to scold harshly"],["bereft","adj","deprived or lacking"],["beseech","v","to beg urgently"],["bias","n","a preference or prejudice"],["bilk","v","to cheat or defraud"],["blandish","v","to flatter or coax"],["blemish","n","an imperfection"],["blight","n","something that ruins or destroys"],["boisterous","adj","noisy and rowdy"],["bombastic","adj","overly wordy or inflated"],["boon","n","a blessing or benefit"],["brazen","adj","shameless or bold"],["brusque","adj","abrupt or blunt"],["burnish","v","to polish or shine"],["buttress","v","to support or strengthen"],["cacophony","n","harsh, jarring sound"],["cadence","n","rhythm or flow"],["cajole","v","to persuade with flattery"],["calamity","n","a great disaster or misfortune"],["callous","adj","emotionally insensitive"],["calumny","n","a false and malicious accusation"],["candid","adj","honest and direct"],["candor","n","openness and honesty"],["canny","adj","clever and careful"],["capacious","adj","spacious or roomy"],["capitulate","v","to surrender or give in"],["capricious","adj","impulsive and unpredictable"],["captivate","v","to attract or charm"],["carp","v","to complain or find fault"],["catalyze","v","to trigger or accelerate"],["catastrophic","adj","disastrous or ruinous"],["caustic","adj","severely sarcastic or biting"],["censure","v","to criticize harshly"],["cerebral","adj","intellectual rather than emotional"],["chastise","v","to scold or punish"],["chide","v","to mildly scold"],["chronicle","v","to record in detail"],["circuitous","adj","indirect or roundabout"],["circumlocution","n","wordy or evasive language"],["circumspect","adj","cautious and careful"],["circumvent","v","to avoid by cleverness"],["clandestine","adj","secret or hidden"],["clemency","n","mercy or leniency"],["cloying","adj","overly sweet or sentimental"],["coagulate","v","to thicken or clot"],["coalesce","v","to come together as one"],["coerce","v","to force or pressure"],["cogent","adj","convincing and clear"],["cognizant","adj","aware or informed"],["coherent","adj","logically connected"],["colloquial","adj","informal in language"],["collusion","n","secret cooperation for deceit"],["colossus","n","a giant or huge thing"],["commendation","n","praise or award"],["commensurate","adj","in proportion or equal"],["compelling","adj","forceful and convincing"],["complacency","n","self-satisfaction with ignorance"],["compliant","adj","willing to obey"],["complicit","adj","involved in wrongdoing"],["compunction","n","a feeling of guilt or regret"],["concede","v","to admit or yield"],["conciliatory","adj","intended to make peace"],["concise","adj","brief and to the point"],["concoct","v","to invent or devise"],["condone","v","to accept or overlook"],["conflagration","n","a large fire"],["confluence","n","a meeting or joining"],["confound","v","to confuse or puzzle"],["congeal","v","to thicken or solidify"],["congenial","adj","pleasant and friendly"],["connive","v","to secretly cooperate or plot"],["consecrate","v","to declare sacred"],["consensus","n","general agreement"],["consign","v","to deliver or hand over"],["consolation","n","comfort after loss"],["constrain","v","to force or limit"],["construe","v","to interpret or understand"],["consummate","adj","complete or perfect"],["contentious","adj","argumentative or controversial"],["contravene","v","to violate or go against"],["contrite","adj","feeling regretful"],["contrived","adj","artificial or forced"],["conundrum","n","a difficult puzzle or problem"],["convoluted","adj","complex and difficult to follow"],["copious","adj","abundant or plentiful"],["cordial","adj","warm and friendly"],["corpulence","n","obesity or heaviness"],["corroborate","v","to confirm or support"],["corrosive","adj","eating away gradually"],["cosmopolitan","adj","worldly or sophisticated"],["covert","adj","secret or hidden"],["covet","v","to desire wrongfully"],["credulity","n","readiness to believe"],["crescendo","n","a gradual increase in intensity"],["culpable","adj","deserving blame"],["cumulative","adj","increasing over time"],["cunning","adj","sly or clever"],["cupidity","n","greed for money or possessions"],["cursory","adj","quick and superficial"],["curt","adj","rudely brief"],["curtail","v","to cut short or reduce"],["daunting","adj","intimidating or overwhelming"],["dearth","n","a lack or scarcity"],["debacle","n","a sudden failure"],["debase","v","to lower in value or dignity"],["debunk","v","to expose as false"],["deceptive","adj","misleading or dishonest"],["decisive","adj","conclusive or determined"],["decorous","adj","proper and polite"],["decry","v","to criticize openly"],["defamatory","adj","harmful to reputation"],["defer","v","to postpone or yield to another"],["deferential","adj","showing respect or submission"],["defile","v","to pollute or corrupt"],["deft","adj","skillful or quick"],["defunct","adj","no longer existing or functioning"],["deleterious","adj","harmful or damaging"],["deliberate","adj","done on purpose"],["delineate","v","to describe or outline clearly"],["demagogue","n","a leader who appeals to emotions and prejudice"],["demean","v","to lower in dignity or standing"],["demure","adj","modest and reserved"],["denigrate","v","to criticize unfairly"],["denounce","v","to publicly condemn"],["deplore","v","to express strong disapproval"],["depravity","n","moral corruption"],["deprecate","v","to express disapproval of"],["derelict","adj","abandoned or neglected"],["deride","v","to mock or ridicule"],["derivative","adj","unoriginal or copied"],["desecrate","v","to violate something sacred"],["desiccated","adj","dried out or lifeless"],["desolate","adj","empty and bleak"],["despondent","adj","hopeless or depressed"],["despot","n","a ruler with absolute power"],["destitute","adj","extremely poor"],["deter","v","to discourage or prevent"],["devious","adj","dishonest or tricky"],["diaphanous","adj","light and delicate"],["didactic","adj","intended to teach"],["diffident","adj","shy or lacking confidence"],["diffuse","v","to spread widely"],["dilatory","adj","slow or delaying"],["diligent","adj","hardworking and careful"],["diminutive","adj","extremely small"],["dirge","n","a funeral song"],["disavow","v","to deny responsibility or support"],["discern","v","to recognize or detect"],["disclose","v","to reveal or make known"],["disconcerting","adj","causing unease or confusion"],["discordant","adj","lacking harmony"],["discrepancy","n","a lack of agreement"],["discretion","n","careful judgment"],["discursive","adj","rambling or unfocused"],["disdain","n","contempt or scorn"],["disparage","v","to speak negatively about"],["disparate","adj","fundamentally different"],["dispel","v","to drive away or eliminate"],["disrepute","n","a state of disgrace"],["dissemble","v","to hide true feelings"],["disseminate","v","to spread widely"],["dissent","n","disagreement or opposition"],["dissipate","v","to scatter or vanish"],["dissonance","n","lack of harmony or agreement"],["dissuade","v","to persuade not to do something"],["diverge","v","to move apart or differ"],["divisive","adj","causing disagreement or division"],["divulge","v","to make known"],["docile","adj","easily taught or managed"],["dogmatic","adj","stubbornly opinionated"],["dormant","adj","inactive or asleep"],["dour","adj","stern and gloomy"],["dubious","adj","doubtful or questionable"],["duplicity","n","deceitfulness or double-dealing"],["duress","n","threats or pressure"],["ebullient","adj","cheerful and full of energy"],["eclectic","adj","drawn from various sources"],["ecstatic","adj","extremely happy"],["edict","n","an official order or proclamation"],["efface","v","to erase or wipe out"],["effervescent","adj","lively and enthusiastic"],["efficacious","adj","effective and efficient"],["effrontery","n","bold and rude behavior"],["egregious","adj","remarkably bad"],["elated","adj","extremely happy"],["elegy","n","a poem for the dead"],["elicit","v","to draw out or bring forth"],["eloquent","adj","persuasive and expressive in speech"],["elucidate","v","to make clear or explain"],["elude","v","to escape or avoid"],["elusive","adj","difficult to find or catch"],["emaciated","adj","extremely thin or weak"],["embellish","v","to decorate or add details"],["embezzle","v","to steal money from trust"],["eminent","adj","famous and respected"],["empathy","n","the ability to understand others' feelings"],["empirical","adj","based on observation or experience"],["emulate","v","to imitate or strive to equal"],["enervate","v","to weaken or drain energy"],["engender","v","to cause or give rise to"],["enigmatic","adj","mysterious or puzzling"],["enmity","n","hatred or hostility"],["ennui","n","boredom from lack of interest"],["ephemeral","adj","lasting a very short time"],["epitome","n","a perfect example"],["equanimity","n","calmness under pressure"],["equivocate","v","to speak ambiguously or avoid the truth"],["erudite","adj","having deep scholarly knowledge"],["eschew","v","to deliberately avoid"],["esoteric","adj","understood by a select few"],["espouse","v","to support or adopt"],["ethereal","adj","light and delicate"],["euphoric","adj","extremely happy"],["evanescent","adj","quickly fading or disappearing"],["evince","v","to show clearly"],["exacerbate","v","to make worse"],["exalt","v","to praise highly"],["exasperate","v","to irritate or annoy greatly"],["exculpate","v","to clear from blame"],["execrable","adj","extremely bad"],["exhort","v","to strongly urge"],["exigent","adj","requiring immediate attention"],["exonerate","v","to free from blame or guilt"],["exorbitant","adj","unreasonably high"],["expedient","adj","convenient and practical"],["expiate","v","to make amends for"],["expunge","v","to erase or remove"],["extant","adj","still existing"],["extol","v","to praise highly"],["extraneous","adj","irrelevant or unnecessary"],["extricate","v","to free from difficulty"],["exult","v","to rejoice greatly"],["fabricate","v","to invent or lie"],["facade","n","a false appearance"],["facile","adj","superficial or easily achieved"],["fallacious","adj","misleading or false"],["fastidious","adj","very attentive to detail"],["fatuous","adj","silly or foolish"],["fecund","adj","fertile or productive"],["felicitous","adj","well-suited or pleasant"],["fervent","adj","passionate or intense"],["fetter","v","to restrain or chain"],["fickle","adj","changing frequently"],["fidelity","n","loyalty or faithfulness"],["flagrant","adj","obviously offensive"],["fleeting","adj","lasting a short time"],["florid","adj","excessively fancy or flowery"],["flout","v","to openly disregard"],["foil","v","to prevent or stop"],["forbearance","n","patient self-control"],["forestall","v","to prevent by acting early"],["forlorn","adj","sad and abandoned"],["forsake","v","to abandon or give up"],["fortitude","n","courage in adversity"],["fortuitous","adj","happening by chance"],["foster","v","to promote or encourage"],["fractious","adj","irritable and quarrelsome"],["fraught","adj","full of something, usually bad"],["frenetic","adj","wildly energetic or frantic"],["frivolous","adj","not serious or important"],["frugal","adj","economical or thrifty"],["fruitless","adj","unproductive or unsuccessful"],["furtive","adj","secretive or stealthy"],["garish","adj","overly bright or showy"],["garrulous","adj","excessively talkative"],["genial","adj","friendly and cheerful"],["gluttony","n","overindulgence in food or drink"],["goad","v","to provoke or urge"],["grandiloquence","n","pompous or lofty speech"],["grandiose","adj","impressive but overblown"],["gratuitous","adj","uncalled for or excessive"],["gregarious","adj","sociable or outgoing"],["grievous","adj","serious or severe"],["guile","n","sly or cunning intelligence"],["hackneyed","adj","overused and unoriginal"],["hallowed","adj","greatly respected or sacred"],["haphazard","adj","lacking order or purpose"],["hapless","adj","unlucky or unfortunate"],["harangue","n","a loud, aggressive speech"],["hardy","adj","strong and able to endure"],["harrowing","adj","extremely distressing or painful"],["haughty","adj","arrogantly superior"],["hegemony","n","dominance or leadership"],["heinous","adj","shockingly wicked"],["heterogeneous","adj","diverse in content"],["hiatus","n","a pause or break"],["hierarchy","n","a system of ranks or levels"],["hinder","v","to slow down or obstruct"],["homogeneous","adj","uniform or of the same kind"],["hypocrisy","n","claiming moral standards without practice"],["hypothetical","adj","based on assumption"],["iconoclast","n","one who attacks traditions"],["idiosyncratic","adj","peculiar or individualistic"],["ignominious","adj","deserving shame or disgrace"],["illicit","adj","illegal or forbidden"],["imminent","adj","about to happen"],["immutable","adj","unchangeable"],["impartial","adj","unbiased or fair"],["impassive","adj","not showing emotion"],["impeccable","adj","flawless or perfect"],["impede","v","to block or hinder"],["imperious","adj","arrogantly commanding"],["impertinent","adj","rude or disrespectful"],["impervious","adj","not affected by"],["impetuous","adj","acting without thought"],["implacable","adj","unable to be calmed or satisfied"],["implicit","adj","understood without being stated"],["impudent","adj","disrespectful or rude"],["impute","v","to attribute or blame"],["inane","adj","silly or stupid"],["incendiary","adj","designed to cause fires or conflict"],["incessant","adj","never stopping"],["inchoate","adj","just begun and undeveloped"],["incisive","adj","sharp or clear in thought"],["incontrovertible","adj","not open to question"],["incorrigible","adj","unable to be corrected"],["indefatigable","adj","never tired"],["indigenous","adj","native to a region"],["indigent","adj","poor or needy"],["indignation","n","anger at unfairness"],["indolent","adj","lazy or avoiding effort"],["indomitable","adj","impossible to defeat"],["induce","v","to cause or persuade"],["ineffable","adj","too great to be expressed"],["inept","adj","lacking skill"],["inexorable","adj","impossible to stop or persuade"],["inexplicable","adj","hard to explain"],["infallible","adj","incapable of error"],["infamy","n","evil fame or reputation"],["ingenious","adj","clever or original"],["ingenuous","adj","innocent or naive"],["inhibit","v","to restrain or prevent"],["inimical","adj","harmful or hostile"],["iniquity","n","immoral or unfair behavior"],["innate","adj","natural or inborn"],["innocuous","adj","harmless or inoffensive"],["innuendo","n","an indirect remark or hint"],["insatiable","adj","impossible to satisfy"],["insidious","adj","harmful in a subtle way"],["insinuate","v","to suggest indirectly"],["insipid","adj","lacking flavor or interest"],["insolent","adj","boldly rude"],["instigate","v","to provoke or start something"],["insular","adj","isolated or narrow-minded"],["integral","adj","essential or necessary"],["interminable","adj","endless or seeming so"],["intractable","adj","hard to control or deal with"],["intransigent","adj","unwilling to compromise"],["intrepid","adj","fearless and adventurous"],["intricate","adj","very detailed or complex"],["inundate","v","to overwhelm or flood"],["inure","v","to accustom to something unpleasant"],["invalidate","v","to make invalid"],["invective","n","harsh or abusive language"],["inveterate","adj","firmly established by habit"],["inviolable","adj","secure from violation"],["irascible","adj","easily angered"],["irreverence","n","lack of respect"],["irrevocable","adj","cannot be changed"],["jubilant","adj","extremely joyful"],["judicious","adj","having good judgment"],["juxtaposition","n","side-by-side placement for contrast"],["laconic","adj","using few words"],["languid","adj","lacking energy"],["laudatory","adj","expressing praise"],["lavish","adj","extravagant or generous"],["lenient","adj","not strict"],["lethargic","adj","sluggish or tired"],["licentious","adj","lacking moral restraint"],["limpid","adj","clear or transparent"],["lithe","adj","flexible and graceful"],["lucid","adj","clear and easy to understand"],["lucrative","adj","producing profit"],["lurid","adj","sensational or shocking"],["maelstrom","n","a violent whirlpool or chaotic situation"],["magnanimous","adj","generous and forgiving"],["malevolent","adj","having ill will"],["malleable","adj","easily shaped or influenced"],["mandatory","adj","required by rule or law"],["maudlin","adj","overly sentimental"],["maverick","n","an independent thinker"],["mendacious","adj","dishonest or false"],["mercurial","adj","unpredictable or changeable"],["meritorious","adj","deserving praise"],["metamorphosis","n","a change in form or nature"],["meticulous","adj","very careful and precise"],["mitigate","v","to lessen the severity"],["mollify","v","to calm or soothe"],["morass","n","a complicated or confused situation"],["morose","adj","gloomy or sullen"],["mundane","adj","ordinary or dull"],["munificence","n","great generosity"],["mutable","adj","changeable or variable"],["myriad","adj","countless or extremely great in number"],["nadir","n","the lowest point"],["nascent","adj","beginning to exist"],["nebulous","adj","vague or unclear"],["nefarious","adj","wicked or evil"],["negligent","adj","careless or inattentive"],["negligible","adj","so small as to be unimportant"],["neophyte","n","a beginner"],["nonchalant","adj","casually unconcerned"],["nondescript","adj","lacking distinctive features"],["notorious","adj","well-known for something bad"],["noxious","adj","harmful or poisonous"],["nuance","n","a subtle difference"],["obdurate","adj","stubborn and unyielding"],["obfuscate","v","to confuse or make unclear"],["oblique","adj","not direct or straightforward"],["oblivious","adj","unaware or unconscious"],["obscure","adj","not well known or hidden"],["obsequious","adj","overly flattering or submissive"],["obsolete","adj","outdated or no longer used"],["obstinate","adj","stubbornly refusing to change"],["obstreperous","adj","noisy and difficult to control"],["obtuse","adj","slow to understand"],["odious","adj","extremely unpleasant"],["officious","adj","overly eager to help or meddle"],["ominous","adj","threatening or foreboding"],["onerous","adj","burdensome or difficult"],["opulent","adj","rich and luxurious"],["ornate","adj","highly decorated"],["orthodox","adj","traditional or established"],["oscillate","v","to move back and forth"],["ostensible","adj","appearing to be true but not necessarily so"],["ostentatious","adj","showy or flashy"],["ostracism","n","exclusion from a group"],["pacific","adj","peaceful or calm"],["palatable","adj","pleasant to taste or accept"],["palliate","v","to relieve without curing"],["pallid","adj","pale or lacking color"],["panacea","n","a universal cure"],["paradigm","n","a model or example"],["paradox","n","a self-contradictory statement"],["paragon","n","a perfect example"],["paramount","adj","more important than anything else"],["pariah","n","a social outcast"],["parsimony","n","extreme stinginess"],["partisan","adj","strongly supporting one side"],["patent","adj","obvious or evident"],["pathos","n","emotion or pity"],["paucity","n","scarcity or lack"],["pejorative","adj","expressing disapproval"],["pellucid","adj","transparently clear"],["penchant","n","a strong liking"],["penitent","adj","feeling regretful"],["penurious","adj","extremely poor"],["perfidious","adj","disloyal or treacherous"],["perfunctory","adj","done without care"],["permeate","v","to spread throughout"],["pernicious","adj","harmful in a subtle way"],["perplex","v","to confuse or puzzle"],["perspicacity","n","insight or sharpness"],["pertinacious","adj","holding firmly to an idea"],["pervasive","adj","spreading widely"],["petulance","n","rudeness or irritability"],["philanthropic","adj","generous to others"],["phlegmatic","adj","unemotional and calm"],["pillage","v","to rob using violence"],["pinnacle","n","the highest point"],["pithy","adj","brief but meaningful"],["pittance","n","a very small amount"],["placate","v","to calm or appease"],["placid","adj","calm and peaceful"],["platitude","n","a dull or overused remark"],["plausible","adj","seeming reasonable"],["plethora","n","an excess or overabundance"],["pliable","adj","easily bent or influenced"],["poignant","adj","emotionally touching"],["polemic","n","a strong verbal attack"],["portent","n","a sign of something to come"],["pragmatic","adj","practical and realistic"],["precarious","adj","dangerously unstable"],["precipice","n","a steep cliff or dangerous edge"],["preclude","v","to make impossible"],["precocious","adj","advanced for one's age"],["predatory","adj","seeking to exploit or harm"],["predilection","n","a preference or liking"],["premeditated","adj","planned beforehand"],["preponderance","n","majority or dominance"],["presage","v","to predict or foreshadow"],["prescient","adj","having foresight"],["presumptuous","adj","overly bold or forward"],["pretentious","adj","acting more important than warranted"],["prevail","v","to win or dominate"],["primeval","adj","ancient or primitive"],["privation","n","lack of basic needs"],["probity","n","honesty and integrity"],["proclivity","n","a natural tendency"],["procure","v","to obtain or acquire"],["profane","adj","disrespectful toward sacred things"],["profligate","adj","wasteful or reckless"],["profound","adj","deep or intense"],["profuse","adj","abundant or excessive"],["prolific","adj","highly productive"],["promulgate","v","to make known officially"],["propagate","v","to spread or promote"],["propensity","n","a natural inclination"],["propitious","adj","favorable or promising"],["propriety","n","proper behavior"],["prosaic","adj","dull or unimaginative"],["proscribe","v","to forbid or ban"],["protean","adj","versatile or changeable"],["prudence","n","caution or wisdom"],["puerile","adj","childish or silly"],["pugnacious","adj","eager to fight"],["punctilious","adj","extremely attentive to detail"],["pungent","adj","having a strong smell or taste"],["punitive","adj","inflicting punishment"],["putrid","adj","rotten and foul-smelling"],["quagmire","n","a difficult or messy situation"],["quandary","n","a state of uncertainty"],["quell","v","to suppress or put an end to"],["querulous","adj","complaining or whining"],["quixotic","adj","unrealistic and idealistic"],["quotidian","adj","occurring daily"],["rancor","n","bitterness or resentment"],["rapport","n","a positive relationship"],["rash","adj","reckless or hasty"],["raucous","adj","loud and disorderly"],["raze","v","to completely destroy"],["rebuke","v","to criticize sharply"],["recalcitrant","adj","stubbornly disobedient"],["rectitude","n","moral uprightness"],["redoubtable","adj","worthy of fear or respect"],["redundant","adj","unnecessary or repetitive"],["refute","v","to prove wrong"],["relegate","v","to assign to a lower position"],["remiss","adj","negligent or careless"],["renounce","v","to give up or reject"],["renown","n","fame or recognition"],["repentant","adj","feeling remorseful"],["replete","adj","filled or well-supplied"],["reprehensible","adj","deserving blame"],["reprieve","n","a temporary relief"],["reproach","v","to express disapproval"],["reprobate","n","a morally unprincipled person"],["repudiate","v","to reject or deny"],["resolute","adj","determined or unwavering"],["respite","n","a short rest or break"],["resplendent","adj","shining brilliantly"],["restitution","n","compensation for loss"],["restive","adj","restless or impatient"],["retract","v","to take back"],["revere","v","to honor or respect deeply"],["revoke","v","to cancel or withdraw"],["ribald","adj","vulgar or indecent"],["rife","adj","widespread or common"],["rigid","adj","stiff or inflexible"],["rudimentary","adj","basic or undeveloped"],["ruminate","v","to think deeply"],["sacrosanct","adj","extremely sacred or inviolable"],["sagacity","n","wisdom or sound judgment"],["salient","adj","most noticeable or important"],["sanctimonious","adj","hypocritically pious"],["sanguine","adj","optimistic or positive"],["satiate","v","to satisfy fully"],["scathing","adj","severely critical"],["scintillating","adj","brilliantly lively or clever"],["scrupulous","adj","very careful or precise"],["scurrilous","adj","vulgar or abusive"],["seminal","adj","highly original and influential"],["serendipity","n","fortunate discovery by chance"],["serene","adj","calm and peaceful"],["servile","adj","overly submissive"],["sobriety","n","seriousness or self-restraint"],["solicitous","adj","showing concern or care"],["somnolent","adj","sleepy or drowsy"],["specious","adj","deceptively attractive"],["spurious","adj","false or fake"],["stagnate","v","to stop developing or flowing"],["stoic","adj","enduring pain without showing emotion"],["strenuous","adj","requiring great effort"],["strident","adj","harsh and loud"],["subjugate","v","to bring under control"],["sublime","adj","of great beauty or excellence"],["subversive","adj","seeking to undermine authority"],["succinct","adj","brief and clear"],["succumb","v","to give in or yield"],["superfluous","adj","unnecessary or excessive"],["surreptitious","adj","secretive or stealthy"],["sycophant","n","a flatterer for personal gain"],["tacit","adj","unspoken but understood"],["taciturn","adj","quiet and reserved"],["tangential","adj","only slightly relevant"],["tantamount","adj","equal in value or meaning"],["tedious","adj","boring and repetitive"],["temerity","n","boldness or recklessness"],["temperance","n","moderation or self-restraint"],["tenable","adj","able to be defended or maintained"],["tenuous","adj","weak or uncertain"],["timorous","adj","fearful or shy"],["tirade","n","a long angry speech"],["torpid","adj","sluggish or inactive"],["tortuous","adj","full of twists and turns"],["tractable","adj","easily managed or controlled"],["tranquil","adj","peaceful and calm"],["transgress","v","to violate a rule or law"],["transient","adj","lasting only a short time"],["transmute","v","to change form or nature"],["travesty","n","a distorted or absurd imitation"],["trenchant","adj","sharp or forceful"],["trepidation","n","fear or anxiety"],["trite","adj","overused and unoriginal"],["truculent","adj","aggressively defiant"],["truncate","v","to shorten by cutting off"],["turgid","adj","swollen or pompous"],["turpitude","n","moral corruption"],["ubiquitous","adj","present everywhere"],["umbrage","n","offense or annoyance"],["uncanny","adj","strangely familiar or eerie"],["unctuous","adj","excessively flattering or oily"],["undermine","v","to weaken or sabotage"],["undulate","v","to move in waves"],["upbraid","v","to scold or criticize"],["usurp","v","to seize power unlawfully"],["utilitarian","adj","practical and functional"],["vacillate","v","to waver between choices"],["vacuous","adj","lacking ideas or intelligence"],["validate","v","to confirm or prove"],["vapid","adj","dull or lacking life"],["vehemently","adv","with strong emotion"],["venerable","adj","worthy of respect due to age or dignity"],["venerate","v","to regard with deep respect"],["veracity","n","truthfulness"],["verbose","adj","wordy or long-winded"],["verdant","adj","green with vegetation"],["vestige","n","a trace or remnant"],["vex","v","to annoy or bother"],["vicarious","adj","experienced through another"],["vicissitude","n","change or variation"],["vigilant","adj","watchful or alert"],["vilify","v","to slander or defame"],["vindicate","v","to clear from blame"],["vindictive","adj","seeking revenge"],["vitriolic","adj","bitter and harsh"],["vituperate","v","to criticize harshly"],["vivacious","adj","lively and animated"],["vociferous","adj","loud and forceful"],["wane","v","to decrease or fade"],["wanton","adj","reckless or malicious"],["whimsical","adj","playfully unusual"],["wily","adj","cunning or clever"],["winsome","adj","charming or pleasing"],["wistful","adj","longing or sadly reflective"],["zealous","adj","enthusiastic or passionate"],["zenith","n","the highest point"]
+];
+
+let queue = [], score = 0, total = 0, streak = 0, current = null, answered = false;
+let mode = 'def'; // 'def' = show definition, guess word | 'word' = show word, guess definition
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-def').classList.toggle('active', m === 'def');
+  document.getElementById('btn-word').classList.toggle('active', m === 'word');
+  score = 0; total = 0; streak = 0;
+  updateStats();
+  queue = [];
+  next();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function refill() {
+  const q = [...WORDS];
+  shuffle(q);
+  queue = q;
+}
+
+function next() {
+  if (queue.length === 0) refill();
+  current = queue.pop();
+  answered = false;
+  render();
+}
+
+function getWrongOptions() {
+  const pool = WORDS.filter(w => w[0] !== current[0]);
+  shuffle(pool);
+  return pool.slice(0, 3);
+}
+
+function posLabel(p) {
+  return p === 'v' ? 'verb' : p === 'n' ? 'noun' : p === 'adj' ? 'adjective' : p === 'adv' ? 'adverb' : p;
+}
+
+function render() {
+  const [word, pos, def] = current;
+  const wrongs = getWrongOptions();
+  const opts = [current, ...wrongs];
+  shuffle(opts);
+
+  document.getElementById('q-counter').textContent = `Q${total + 1}`;
+  document.getElementById('pos-tag').textContent = posLabel(pos);
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+
+  if (mode === 'def') {
+    document.getElementById('prompt-text').textContent = def;
+  } else {
+    document.getElementById('prompt-text').textContent = word;
+  }
+
+  document.getElementById('prog').style.width = (Math.min((total % 50) / 50 * 100, 100)) + '%';
+
+  const container = document.getElementById('choices');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = mode === 'def' ? opt[0] : opt[2];
+    btn.dataset.word = opt[0];
+    btn.onclick = () => pick(btn);
+    container.appendChild(btn);
+  });
+}
+
+function pick(btn) {
+  if (answered) return;
+  answered = true;
+  total++;
+
+  const isCorrect = btn.dataset.word === current[0];
+  const btns = document.querySelectorAll('.choice-btn');
+  btns.forEach(b => {
+    b.disabled = true;
+    if (b.dataset.word === current[0]) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('feedback');
+  if (isCorrect) {
+    score++;
+    streak++;
+    btn.classList.add('correct');
+    if (streak >= 10) {
+      fb.textContent = `🔥 ${streak} streak — you're on fire!`;
+      fb.className = 'feedback good';
+    } else if (streak >= 5) {
+      fb.textContent = `🔥 ${streak} in a row!`;
+      fb.className = 'feedback good';
+    } else if (streak >= 3) {
+      fb.textContent = `Nice — ${streak} streak!`;
+      fb.className = 'feedback good';
+    } else {
+      fb.textContent = 'Correct!';
+      fb.className = 'feedback good';
+    }
+  } else {
+    btn.classList.add('wrong');
+    streak = 0;
+    fb.textContent = mode === 'def'
+      ? `The answer was "${current[0]}" — ${current[2]}`
+      : `The answer was: ${current[2]}`;
+    fb.className = 'feedback bad';
+  }
+
+  updateStats();
+  setTimeout(next, isCorrect ? 900 : 1800);
+}
+
+function updateStats() {
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('seen').textContent = total;
+  document.getElementById('accuracy').textContent = total > 0 ? Math.round(score / total * 100) + '%' : '—';
+}
+
+refill();
+next();
+</script>
+</body>
+</html>
