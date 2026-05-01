@@ -358,9 +358,12 @@ function next() {
 }
 
 function getWrongOptions() {
-  const pool = WORDS.filter(w => w[0] !== current[0]);
-  shuffle(pool);
-  return pool.slice(0, 3);
+  const samePos = WORDS.filter(w => w[0] !== current[0] && w[1] === current[1]);
+  shuffle(samePos);
+  if (samePos.length >= 3) return samePos.slice(0, 3);
+  const fallback = WORDS.filter(w => w[0] !== current[0] && !samePos.includes(w));
+  shuffle(fallback);
+  return [...samePos, ...fallback].slice(0, 3);
 }
 
 function posLabel(p) {
